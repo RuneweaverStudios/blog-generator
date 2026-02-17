@@ -1,0 +1,7 @@
+{
+  "name": "Blog Generator",
+  "author": "OpenClaw",
+  "version": "1.0.0",
+  "description": "Analyzes journal entries and chat history to identify high-value topics and automatically generate blog posts.",
+  "main": "scripts/blog_generator.py"
+}
