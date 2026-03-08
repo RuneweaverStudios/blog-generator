@@ -13,5 +13,19 @@
     "python"
   ],
   "platform": "openclaw",
-  "main": "scripts/blog_generator.py"
+  "main": "scripts/blog_generator.py",
+  "requires": {
+    "optionalEnv": [
+      "OPENCLAW_HOME"
+    ]
+  },
+  "fileAccess": {
+    "read": [
+      "~/.openclaw/journal/ (journal markdown files)"
+    ],
+    "write": [
+      "~/.openclaw/blogs/ (generated blog posts)"
+    ]
+  },
+  "dependencies": []
 }
