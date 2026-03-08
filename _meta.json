@@ -1,16 +1,19 @@
 {
   "schema": "openclaw.skill.v1",
   "name": "blog-generator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "Blog Generator",
-  "description": "Analyzes journal entries and chat history to identify high-value topics and automatically generate blog posts.",
-  "author": "OpenClaw",
+  "description": "Analyzes journal entries and chat history to identify high-value topics and automatically generate structured blog posts with problem/solution format. Supports cron scheduling, configurable scoring weights, and JSON output.",
+  "author": "RuneweaverStudios",
   "tags": [
     "blog",
     "content-creation",
     "generation",
     "cron",
-    "python"
+    "python",
+    "journal",
+    "seo",
+    "automation"
   ],
   "platform": "openclaw",
   "main": "scripts/blog_generator.py",
@@ -21,10 +24,10 @@
   },
   "fileAccess": {
     "read": [
-      "~/.openclaw/journal/ (journal markdown files)"
+      "$OPENCLAW_HOME/journal/ (journal markdown files)"
     ],
     "write": [
-      "~/.openclaw/blogs/ (generated blog posts)"
+      "$OPENCLAW_HOME/blogs/ (generated blog posts)"
     ]
   },
   "dependencies": []

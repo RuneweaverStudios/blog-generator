@@ -1,0 +1,49 @@
+{
+  "paths": {
+    "openclawHome": "~/.openclaw",
+    "journalDir": "journal",
+    "blogsDir": "blogs"
+  },
+  "scanning": {
+    "defaultDaysBack": 7,
+    "maxTopics": 3,
+    "filePatterns": ["chat_analysis_*.md", "*.md"]
+  },
+  "scoring": {
+    "weights": {
+      "highValueKeyword": 2,
+      "problemSolvingWord": 1,
+      "contentDepthBonus": 1,
+      "obstacleBonus": 2,
+      "solutionBonus": 3
+    },
+    "highValueKeywords": [
+      "openclaw gateway",
+      "openclaw setup",
+      "openclaw configuration",
+      "openclaw skills",
+      "openclaw troubleshooting",
+      "gateway auth",
+      "gateway restart",
+      "gateway disconnected",
+      "agent swarm",
+      "subagent",
+      "cursor chat history",
+      "openclaw cron",
+      "openclaw automation"
+    ],
+    "problemSolvingWords": [
+      "error", "failed", "issue", "problem", "fix",
+      "solution", "how to", "troubleshoot", "resolve", "workaround"
+    ],
+    "contentDepthMinLength": 100
+  },
+  "templates": {
+    "sectionOrder": ["overview", "problem", "solution", "takeaways", "related"],
+    "slugMaxLength": 50
+  },
+  "output": {
+    "filenameFormat": "{date}_{slug}.md",
+    "dateFormat": "%Y%m%d"
+  }
+}

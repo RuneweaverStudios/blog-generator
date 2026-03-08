@@ -1,46 +1,124 @@
 ---
 name: blog-generator
-displayName: Blog Generator | OpenClaw Skill
-description: Analyzes journal entries and chat history to identify high-value topics and automatically generate blog posts.
-version: 1.0.0
+displayName: Blog Generator
+description: Analyzes journal entries and chat history to identify high-value topics and automatically generate structured blog posts with problem/solution format. Supports cron scheduling, configurable scoring weights, and JSON output.
+version: 1.1.0
 ---
 
-# Blog Generator | OpenClaw Skill
+# Blog Generator
 
 Automatically generates blog posts by analyzing journal entries, chat history, and recent activity to identify high-value, high-search-volume topics related to OpenClaw.
 
-## What this skill does
+## What This Skill Does
 
 - **Scans** journal entries from the last N days for interesting topics (discoveries, obstacles, solutions)
-- **Identifies** high-value topics based on keyword relevance and problem-solving value
-- **Researches** search volume and keyword opportunities (heuristic-based, can be enhanced with APIs)
+- **Scores** topics based on configurable keyword weights and content quality
 - **Generates** structured blog posts with overview, problem, solution, and takeaways sections
-- **Saves** blog posts to `~/.openclaw/blogs/` as markdown files
+- **Saves** posts to the blogs directory as timestamped markdown files
+- **Supports** JSON output for pipeline integration and cron-based automation
 
-## When to use
+## When to Use
 
 - As a scheduled cron job to automatically generate blog content weekly or daily
 - Manually to create blog posts from recent journal analysis
 - To identify and document high-value solutions and discoveries
 
-## Commands (use absolute path for exec)
+## Commands
 
 ```bash
 # Generate blog posts from last 7 days of journal entries
-python3 ~/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py
+python3 scripts/blog_generator.py
 
 # Analyze last 14 days and generate up to 5 posts
-python3 ~/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py --days 14 --max-topics 5
+python3 scripts/blog_generator.py --days 14 --max-topics 5
 
-# Output JSON format
-python3 ~/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py --json
+# Output JSON format (for pipelines)
+python3 scripts/blog_generator.py --json
+
+# Use a custom OpenClaw home directory
+python3 scripts/blog_generator.py --openclaw-home /path/to/openclaw
+
+# Backward-compatible cron wrapper
+python3 scripts/generate_blog.py --days 7 --json
 ```
 
+## CLI Arguments
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--days` | 7 (configurable) | Days of journal history to scan |
+| `--max-topics` | 3 (configurable) | Maximum blog posts to generate |
+| `--json` | false | Output results as JSON |
+| `--openclaw-home` | `$OPENCLAW_HOME` or `~/.openclaw` | OpenClaw home directory |
+
+Defaults for `--days` and `--max-topics` are read from `config.json` when not specified on the command line.
+
+## Configuration (config.json)
+
+All scoring weights, paths, and template settings are configurable:
+
+```json
+{
+  "paths": {
+    "openclawHome": "~/.openclaw",
+    "journalDir": "journal",
+    "blogsDir": "blogs"
+  },
+  "scanning": {
+    "defaultDaysBack": 7,
+    "maxTopics": 3,
+    "filePatterns": ["chat_analysis_*.md", "*.md"]
+  },
+  "scoring": {
+    "weights": {
+      "highValueKeyword": 2,
+      "problemSolvingWord": 1,
+      "contentDepthBonus": 1,
+      "obstacleBonus": 2,
+      "solutionBonus": 3
+    },
+    "highValueKeywords": ["openclaw gateway", "openclaw setup", "..."],
+    "problemSolvingWords": ["error", "failed", "fix", "..."],
+    "contentDepthMinLength": 100
+  },
+  "templates": {
+    "sectionOrder": ["overview", "problem", "solution", "takeaways", "related"],
+    "slugMaxLength": 50
+  },
+  "output": {
+    "filenameFormat": "{date}_{slug}.md",
+    "dateFormat": "%Y%m%d"
+  }
+}
+```
+
+### Configuration Keys
+
+| Key | Description |
+|-----|-------------|
+| `paths.openclawHome` | Base OpenClaw directory (overridden by `$OPENCLAW_HOME` env var or `--openclaw-home` flag) |
+| `paths.journalDir` | Subdirectory within OpenClaw home for journal files |
+| `paths.blogsDir` | Subdirectory within OpenClaw home for generated blog posts |
+| `scoring.weights.*` | Point values for different scoring factors |
+| `scoring.highValueKeywords` | Keywords that boost topic score |
+| `scoring.problemSolvingWords` | Problem-related words that boost topic score |
+| `scoring.contentDepthMinLength` | Minimum content length for depth bonus |
+| `templates.slugMaxLength` | Maximum length for filename slugs |
+| `output.dateFormat` | strftime format for filename date prefix |
+
+## Topic Scoring
+
+Topics are scored based on configurable weights:
+
+| Factor | Default Weight | Description |
+|--------|---------------|-------------|
+| High-value keyword match | +2 per keyword | OpenClaw-specific terms |
+| Problem-solving word | +1 per word | Error/fix/troubleshoot language |
+| Content depth | +1 | Content exceeds minimum length threshold |
+| Obstacle type bonus | +2 | Problems users face (high search value) |
+| Solution type bonus | +3 | How-to solutions (highest search value) |
+
 ## Integration as a Cron Job
-
-This skill is designed to run periodically (daily or weekly) via OpenClaw cron to automatically generate blog content.
-
-**Example Cron Job Configuration (Daily):**
 
 ```json
 {
@@ -51,79 +129,41 @@ This skill is designed to run periodically (daily or weekly) via OpenClaw cron t
     "thinking": "low",
     "timeoutSeconds": 300
   },
-  "schedule": {
-    "kind": "cron",
-    "cron": "0 9 * * *"
-  },
-  "delivery": {
-    "mode": "announce"
-  },
+  "schedule": { "kind": "cron", "cron": "0 9 * * *" },
+  "delivery": { "mode": "announce" },
   "sessionTarget": "isolated",
   "name": "Blog Post Generator"
 }
 ```
 
-**Example Cron Job Configuration (Weekly):**
-
-```json
-{
-  "payload": {
-    "kind": "agentTurn",
-    "message": "Run blog-generator skill with --days 7 --max-topics 3 to generate weekly blog posts from journal analysis.",
-    "model": "openrouter/google/gemini-2.5-flash",
-    "thinking": "low",
-    "timeoutSeconds": 300
-  },
-  "schedule": {
-    "kind": "cron",
-    "cron": "0 10 * * 1"
-  },
-  "delivery": {
-    "mode": "announce"
-  },
-  "sessionTarget": "isolated",
-  "name": "Weekly Blog Generator"
-}
-```
-
 ## Output Format
 
-Blog posts are saved to `~/.openclaw/blogs/YYYYMMDD_slugified-title.md` with:
+Blog posts are saved to `$OPENCLAW_HOME/blogs/YYYYMMDD_slugified-title.md` with sections:
 
-- **Title**: Extracted or generated from topic content
-- **Overview**: Context about the topic
-- **The Problem**: Description of the issue or challenge
-- **The Solution**: Step-by-step solution guide
-- **Key Takeaways**: Summary points
-- **Related Topics**: Links to related content
+- **Title** -- Extracted or generated from topic content
+- **Overview** -- Context about the topic
+- **The Problem** -- Description of the issue or challenge
+- **The Solution** -- Step-by-step solution guide
+- **Key Takeaways** -- Summary points
+- **Related Topics** -- Links to related content
 
-## Topic Scoring
+## Directory Structure
 
-Topics are scored based on:
-
-- **High-value keywords**: OpenClaw-specific terms, problem-solving language
-- **Content type**: Solutions score highest, then obstacles, then discoveries
-- **Content depth**: Longer, more detailed content scores higher
-- **Search volume indicators**: Keywords like "how to", "tutorial", "fix" increase value
+```
+blog-generator/
+├── SKILL.md               # Skill specification
+├── _meta.json             # Skill metadata
+├── config.json            # Configuration (scoring, paths, templates)
+├── README.md              # Quick-start guide
+├── requirements.txt       # Python dependencies (none)
+├── .gitignore             # Git ignore rules
+└── scripts/
+    ├── blog_generator.py  # Main entry point
+    └── generate_blog.py   # Cron-compatible wrapper (delegates to blog_generator.py)
+```
 
 ## Requirements
 
-- Journal entries in `~/.openclaw/journal/`
-- Blogs directory writable at `~/.openclaw/blogs/`
-- Chat history analyzer skill (for journal entries)
-
-## How it works
-
-1. Scans journal directory for markdown files from the last N days
-2. Extracts topics from discoveries, obstacles, and solutions sections
-3. Scores topics based on keyword relevance and value
-4. Selects top N high-value topics
-5. Generates structured blog posts with problem/solution format
-6. Saves posts to blogs directory with timestamped filenames
-
-## Enhancement Opportunities
-
-- Integrate with Google Keyword Planner API for real search volume data
-- Use AI model to enhance blog post quality and SEO optimization
-- Cross-reference with existing blog posts to avoid duplicates
-- Generate multiple variations of posts for A/B testing
+- **Python 3.8+** -- Runtime (no external packages needed)
+- Journal entries in `$OPENCLAW_HOME/journal/`
+- Writable blogs directory at `$OPENCLAW_HOME/blogs/`
