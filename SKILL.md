@@ -15,7 +15,7 @@ Automatically generates blog posts by analyzing journal entries, chat history, a
 - **Identifies** high-value topics based on keyword relevance and problem-solving value
 - **Researches** search volume and keyword opportunities (heuristic-based, can be enhanced with APIs)
 - **Generates** structured blog posts with overview, problem, solution, and takeaways sections
-- **Saves** blog posts to `/Users/ghost/.openclaw/blogs/` as markdown files
+- **Saves** blog posts to `~/.openclaw/blogs/` as markdown files
 
 ## When to use
 
@@ -27,13 +27,13 @@ Automatically generates blog posts by analyzing journal entries, chat history, a
 
 ```bash
 # Generate blog posts from last 7 days of journal entries
-python3 /Users/ghost/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py
+python3 ~/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py
 
 # Analyze last 14 days and generate up to 5 posts
-python3 /Users/ghost/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py --days 14 --max-topics 5
+python3 ~/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py --days 14 --max-topics 5
 
 # Output JSON format
-python3 /Users/ghost/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py --json
+python3 ~/.openclaw/workspace/skills/blog-generator/scripts/blog_generator.py --json
 ```
 
 ## Integration as a Cron Job
@@ -88,7 +88,7 @@ This skill is designed to run periodically (daily or weekly) via OpenClaw cron t
 
 ## Output Format
 
-Blog posts are saved to `/Users/ghost/.openclaw/blogs/YYYYMMDD_slugified-title.md` with:
+Blog posts are saved to `~/.openclaw/blogs/YYYYMMDD_slugified-title.md` with:
 
 - **Title**: Extracted or generated from topic content
 - **Overview**: Context about the topic
@@ -108,8 +108,8 @@ Topics are scored based on:
 
 ## Requirements
 
-- Journal entries in `/Users/ghost/.openclaw/journal/`
-- Blogs directory writable at `/Users/ghost/.openclaw/blogs/`
+- Journal entries in `~/.openclaw/journal/`
+- Blogs directory writable at `~/.openclaw/blogs/`
 - Chat history analyzer skill (for journal entries)
 
 ## How it works
