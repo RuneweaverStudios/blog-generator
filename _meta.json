@@ -13,7 +13,10 @@
     "python",
     "journal",
     "seo",
-    "automation"
+    "automation",
+    "markdown",
+    "topic-scoring",
+    "problem-solution"
   ],
   "platform": "openclaw",
   "main": "scripts/blog_generator.py",

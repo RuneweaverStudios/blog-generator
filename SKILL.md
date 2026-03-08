@@ -106,9 +106,17 @@ All scoring weights, paths, and template settings are configurable:
 | `templates.slugMaxLength` | Maximum length for filename slugs |
 | `output.dateFormat` | strftime format for filename date prefix |
 
-## Topic Scoring
+## Topic Scoring Algorithm
 
-Topics are scored based on configurable weights:
+Topics are ranked by a weighted scoring algorithm. Each journal entry is scanned and scored as follows:
+
+1. **Keyword scan**: The entry text is searched for `scoring.highValueKeywords` (e.g., "openclaw gateway", "openclaw setup"). Each match adds `weights.highValueKeyword` points.
+2. **Problem language scan**: Words from `scoring.problemSolvingWords` (e.g., "error", "failed", "fix") are counted. Each match adds `weights.problemSolvingWord` points.
+3. **Content depth check**: If the entry exceeds `scoring.contentDepthMinLength` characters, `weights.contentDepthBonus` points are added.
+4. **Type classification**: Entries mentioning obstacles or blockers receive `weights.obstacleBonus`; entries describing solutions receive `weights.solutionBonus`.
+5. **Ranking**: All entries are sorted by total score descending. The top `maxTopics` entries become blog post candidates.
+
+### Scoring Weights
 
 | Factor | Default Weight | Description |
 |--------|---------------|-------------|
@@ -117,6 +125,16 @@ Topics are scored based on configurable weights:
 | Content depth | +1 | Content exceeds minimum length threshold |
 | Obstacle type bonus | +2 | Problems users face (high search value) |
 | Solution type bonus | +3 | How-to solutions (highest search value) |
+
+### Example Score Calculation
+
+Given a journal entry: "Fixed the openclaw gateway 403 error by rotating the OpenRouter API key"
+- "openclaw gateway" keyword: +2
+- "fixed" problem-solving word: +1
+- "error" problem-solving word: +1
+- Content depth (if > 100 chars): +1
+- Solution type bonus: +3
+- **Total: 8 points**
 
 ## Integration as a Cron Job
 
@@ -160,6 +178,32 @@ blog-generator/
 └── scripts/
     ├── blog_generator.py  # Main entry point
     └── generate_blog.py   # Cron-compatible wrapper (delegates to blog_generator.py)
+```
+
+## Example Generated Output
+
+A generated blog post (`20260308_fixing-openclaw-gateway-403-errors.md`) looks like:
+
+```markdown
+# Fixing OpenClaw Gateway 403 Errors
+
+## Overview
+When using OpenClaw with OpenRouter, you may encounter 403 errors...
+
+## The Problem
+The gateway returns HTTP 403 when the OpenRouter API key has been
+exhausted or rate-limited...
+
+## The Solution
+1. Check your OpenRouter dashboard for usage limits
+2. Rotate your API key in openclaw.json...
+
+## Key Takeaways
+- Monitor API key usage proactively
+- Set up alerts for rate limit thresholds...
+
+## Related Topics
+- Gateway configuration, API key management, OpenRouter setup
 ```
 
 ## Requirements
