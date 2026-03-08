@@ -32,6 +32,22 @@ def load_config() -> dict:
     return {}
 
 
+def validate_config(config: dict) -> list:
+    """Validate that required config keys exist. Returns list of warnings."""
+    warnings = []
+    required_sections = ["paths", "scanning", "scoring"]
+    for section in required_sections:
+        if section not in config:
+            warnings.append(f"Missing config section: {section} (using defaults)")
+    paths = config.get("paths", {})
+    if "openclawHome" not in paths and "journalDir" not in paths:
+        warnings.append("No paths configured; using defaults (~/.openclaw/journal)")
+    scoring = config.get("scoring", {})
+    if "weights" not in scoring:
+        warnings.append("No scoring weights configured; using built-in defaults")
+    return warnings
+
+
 class BlogGenerator:
     """Generates blog posts from journal entries and chat history analysis."""
 
@@ -342,6 +358,9 @@ def _resolve_openclaw_home(args_home: Optional[str], config: dict) -> Path:
 
 def main():
     config = load_config()
+    config_warnings = validate_config(config)
+    for w in config_warnings:
+        print(f"Config warning: {w}", file=sys.stderr)
 
     parser = argparse.ArgumentParser(
         description="Generate blog posts from journal entries and chat history."
