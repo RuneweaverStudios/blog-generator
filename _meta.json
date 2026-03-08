@@ -5,7 +5,13 @@
   "displayName": "Blog Generator",
   "description": "Analyzes journal entries and chat history to identify high-value topics and automatically generate blog posts.",
   "author": "OpenClaw",
-  "tags": [],
+  "tags": [
+    "blog",
+    "content-creation",
+    "generation",
+    "cron",
+    "python"
+  ],
   "platform": "openclaw",
   "main": "scripts/blog_generator.py"
 }
